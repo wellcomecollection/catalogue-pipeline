@@ -49,6 +49,9 @@ from adapters.utils.axiell_changeset_reader import SupersededGuid
 
 logger = structlog.get_logger(__name__)
 
+# A harvest fault that drops a mandatory field would otherwise hide every record.
+MAX_MISSING_FIELD_HIDES = 50
+
 
 def utc_now_iso() -> str:
     """Timezone-aware UTC timestamp in ISO 8601."""
@@ -291,6 +294,7 @@ def run_sync(
     unflagged_entries: list[SyncDeletionEntry] = []
     total_successful = 0
     total_errors = 0
+    missing_field_hides = 0
     counts: dict[str, int] = {
         "created": 0,
         "updated": 0,
@@ -327,6 +331,9 @@ def run_sync(
         # Records hidden from discovery because they failed to map, so stale
         # FOLIO data is not public. Also counted in "failed".
         "unmapped_hidden": 0,
+        # Published records with a missing mandatory field left as they were,
+        # because the run had already hidden MAX_MISSING_FIELD_HIDES of them.
+        "unmapped_hide_capped": 0,
         # Records whose item carried a location note the sync could no longer
         # claim, so a duplicate was left behind. Not an error: nothing failed and
         # nothing was lost, but each one needs reconciling by hand in FOLIO.
@@ -369,14 +376,21 @@ def run_sync(
             )
             # FOLIO still holds the last good sync, which may now be wrong
             # (closed or withheld since), so it is hidden until the record maps.
-            guid = unmapped_guid(row["content"], exc)
-            if guid is not None:
-                hidden = hide_by_guid(guid, folio, dry_run=dry_run)
+            unmapped = unmapped_guid(row["content"])
+            if unmapped is not None:
+                hide_guid, withheld = unmapped
+                if not withheld and missing_field_hides >= MAX_MISSING_FIELD_HIDES:
+                    counts["unmapped_hide_capped"] += 1
+                    logger.error("unmapped_hide_capped", source_id=source_id)
+                    continue
+                hidden = hide_by_guid(hide_guid, folio, dry_run=dry_run)
                 if any(
                     getattr(hidden, entity).action == "suppress"
                     for entity in ("instance", "holdings", "item")
                 ):
                     counts["unmapped_hidden"] += 1
+                    if not withheld:
+                        missing_field_hides += 1
                 _record_cascade(
                     hidden,
                     record_id=source_id,

@@ -14,13 +14,13 @@ from typing import Any
 
 import pytest
 
+from adapters.steps.axiell_folio_sync import run_axiell_folio_sync
 from adapters.steps.axiell_folio_sync.mapping import unmapped_guid
-from adapters.steps.axiell_folio_sync.mapping.marc import (
-    MappingError,
-    MissingFieldError,
-)
+from adapters.steps.axiell_folio_sync.models import AxiellFolioSyncEvent
 from adapters.steps.axiell_folio_sync.report import AxiellFolioSyncReport
+from adapters.steps.axiell_folio_sync.run_axiell_folio_sync import run_sync
 
+from .test_axiell_folio_sync import FakeRefCache
 from .test_harvest_untick import (
     GUID,
     StatefulInventory,
@@ -211,30 +211,98 @@ def test_an_unmapped_record_is_not_hidden_on_a_dry_run() -> None:
     assert resp.counts["suppressed"] == 3
 
 
+OTHER_GUID = "22222222-2222-4222-8222-222222222222"
+
+
+class _NoLocations(FakeRefCache):
+    def resolve_location(self, name: str | None) -> str:
+        return None  # type: ignore[return-value]
+
+
+def _sync_rows(
+    folio: StatefulInventory, *contents: str, ref: FakeRefCache | None = None
+) -> Any:
+    rows = [
+        {"id": f"rec-{n}", "changeset": "cs1", "content": content, "deleted": False}
+        for n, content in enumerate(contents, start=1)
+    ]
+    return run_sync(
+        AxiellFolioSyncEvent(job_id="job-1", changeset_ids=["cs1"]),
+        rows,
+        ref or FakeRefCache(),  # type: ignore[arg-type]
+        folio,
+        dry_run=False,
+    )
+
+
+def test_a_missing_field_behind_another_mapping_error_still_hides(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    reports: list[AxiellFolioSyncReport] = []
+    monkeypatch.setattr(
+        AxiellFolioSyncReport, "publish", lambda self: reports.append(self)
+    )
+    folio = _synced()
+
+    # The unresolved location fails first, in the holdings, before the item's 655.
+    resp = _sync_rows(folio, _without(PUBLISHED, _CATEGORY), ref=_NoLocations())
+
+    assert "Unresolved normal location" in str(reports[-1].errors[0].error)
+    _assert_hidden_from_discovery_only(folio)
+    assert resp.counts["unmapped_hidden"] == 1
+
+
+def test_missing_field_hides_stop_at_the_cap(monkeypatch: pytest.MonkeyPatch) -> None:
+    # A harvest that lost a mandatory field must not hide every synced record.
+    monkeypatch.setattr(run_axiell_folio_sync, "MAX_MISSING_FIELD_HIDES", 1)
+    other = _record(flagged=True, guid=OTHER_GUID)
+    folio = StatefulInventory()
+    _sync_rows(folio, PUBLISHED, other)
+
+    resp = _sync_rows(folio, _unmapped(PUBLISHED), _unmapped(other))
+
+    assert folio.instance()["discoverySuppress"] is True
+    assert folio.instance(OTHER_GUID)["discoverySuppress"] is False
+    assert resp.counts["unmapped_hidden"] == 1
+    assert resp.counts["unmapped_hide_capped"] == 1
+    assert resp.counts["failed"] == 2
+
+
+def test_the_cap_does_not_apply_to_withheld_records(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(run_axiell_folio_sync, "MAX_MISSING_FIELD_HIDES", 0)
+    folio = _synced()
+
+    resp = _sync(folio, _unmapped(UNPUBLISHED))
+
+    _assert_hidden_from_discovery_only(folio)
+    assert resp.counts["unmapped_hide_capped"] == 0
+
+
 @pytest.mark.parametrize(
     "content",
     [
         NO_MARKER,
+        _unmapped(NO_MARKER),
         _record(flagged=False),
         _record(flagged=True, level="Series"),
-        _record(flagged=True, guid="not-a-guid"),
+        _unmapped(_record(flagged=True, guid="not-a-guid")),
+        PUBLISHED,
+        _unknown_category(PUBLISHED),
     ],
 )
 def test_unmapped_guid_is_none_for_records_that_must_not_be_hidden(
     content: str,
 ) -> None:
-    assert unmapped_guid(content, MissingFieldError("missing")) is None
+    assert unmapped_guid(content) is None
 
 
-@pytest.mark.parametrize("content", [PUBLISHED, UNPUBLISHED, FOR_DELETION])
-def test_unmapped_guid_is_the_001_when_a_field_is_missing(content: str) -> None:
-    assert unmapped_guid(content, MissingFieldError("missing")) == GUID
-
-
-def test_unmapped_guid_is_none_for_another_error_on_a_published_record() -> None:
-    assert unmapped_guid(PUBLISHED, MappingError("unresolved")) is None
+@pytest.mark.parametrize("field", [_TITLE, _CATEGORY, _LOCATION])
+def test_unmapped_guid_is_the_001_when_a_field_is_missing(field: str) -> None:
+    assert unmapped_guid(_without(PUBLISHED, field)) == (GUID, False)
 
 
 @pytest.mark.parametrize("content", [UNPUBLISHED, FOR_DELETION])
 def test_unmapped_guid_is_the_001_of_a_withheld_record(content: str) -> None:
-    assert unmapped_guid(content, MappingError("unresolved")) == GUID
+    assert unmapped_guid(content) == (GUID, True)

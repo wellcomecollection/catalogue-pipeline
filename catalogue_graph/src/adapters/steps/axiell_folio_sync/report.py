@@ -94,6 +94,10 @@ class AxiellFolioSyncReport(PipelineReport):
                 name="records_unmapped_hidden",
                 value=self.counts.get("unmapped_hidden", 0),
             ),
+            PipelineMetric(
+                name="records_unmapped_hide_capped",
+                value=self.counts.get("unmapped_hide_capped", 0),
+            ),
             PipelineMetric(name="records_failed", value=self.counts.get("failed", 0)),
             # Not a failure: the record synced, but an unclaimable location note
             # was left behind on the item. Alarm-worthy only if it trends up.

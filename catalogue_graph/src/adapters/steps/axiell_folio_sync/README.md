@@ -39,6 +39,9 @@ The design, record-selection rules and tombstone semantics are specified in
      `failed`, and in `unmapped_hidden` when something was hidden, and listed in the manifest's deletions with the
      reason `unmapped`. Other mapping errors hide nothing, because a value missing from a mapping table or from the
      FOLIO tenant may be a fault in the table, the tenant or a deploy, and could hide every synced record.
+     A harvest that lost a mandatory field would fail every record this way, so a run hides at most 50 published
+     records for a missing field (`MAX_MISSING_FIELD_HIDES`). The rest are left as they were, counted in
+     `unmapped_hide_capped` and logged as errors. Withheld records are not capped.
    * **Where the sync and the Axiell transformer differ.** A record with no recognisable `981 $a` fails with a
      mapping error and its FOLIO records are left as they were: the stylesheet emits the marker on every record, so
      its absence is a harvest fault, and hiding on it could hide every synced record. The transformer suppresses

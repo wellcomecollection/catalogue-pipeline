@@ -51,7 +51,6 @@ from .config import (
 from .marc import (
     CanonicalRecord,
     MappingError,
-    MissingFieldError,
     extract,
     parse_xml,
 )
@@ -117,7 +116,7 @@ def _resolve(field: FieldMap, rec: CanonicalRecord, ref: RefCache) -> str:
     raw = getattr(rec, field.canonical) if field.canonical else None
     value = (raw or "").strip()
     if field.required and not value:
-        raise MissingFieldError(
+        raise MappingError(
             f"Missing {field.label} (MARC {field.marc}) for source_id={rec.source_id}"
             " — required, with no default to fall back on"
         )
@@ -157,7 +156,7 @@ def _resolve(field: FieldMap, rec: CanonicalRecord, ref: RefCache) -> str:
 
 def build_instance(rec: CanonicalRecord, ref: RefCache) -> Instance:
     if not rec.title:
-        raise MissingFieldError(f"Missing 245$a (title) for source_id={rec.source_id}")
+        raise MappingError(f"Missing 245$a (title) for source_id={rec.source_id}")
     # AxC object_number (the (AltRefNo)-prefixed 035$a) becomes a "Local identifier"
     # on the instance. Absent when the record carries no (AltRefNo) 035$a — omit
     # identifiers entirely then.
@@ -380,8 +379,16 @@ def _is_withheld(root: Record) -> bool:
     return not is_publishable(root)
 
 
-def unmapped_guid(xml_content: str, error: MappingError) -> str | None:
-    """The GUID of a selected record whose FOLIO records to hide after it failed to map.
+# A selected record without one of these cannot map, whatever the tenant holds.
+_MANDATORY_FIELDS = (
+    "title",
+    MATERIAL_TYPE_FIELD.canonical,
+    NORMAL_LOCATION_FIELD.canonical,
+)
+
+
+def unmapped_guid(xml_content: str) -> tuple[str, bool] | None:
+    """The GUID of a selected record to hide after it failed to map, and whether it is withheld.
 
     Only for a missing mandatory field or a withheld record. Any other failure
     may be a tenant or mapping-table fault, which could hide every record.
@@ -391,14 +398,20 @@ def unmapped_guid(xml_content: str, error: MappingError) -> str | None:
         return None
     try:
         withheld = _is_withheld(root)
-        if not (withheld or isinstance(error, MissingFieldError)):
+        # Read from the record, as the first mapping error can mask a missing field.
+        missing = any(
+            not (extract(root, MARC_SOURCE[field]) or "").strip()
+            for field in _MANDATORY_FIELDS
+            if field
+        )
+        if not (withheld or missing):
             return None
         source_id = (extract(root, MARC_SOURCE["source_id"]) or "").strip()
         _guid(source_id)
     except ValueError:
         # MappingError is a ValueError: no marker, or no UUID to derive ids from.
         return None
-    return source_id
+    return source_id, withheld
 
 
 def unflagged_guid(xml_content: str) -> str | None:
