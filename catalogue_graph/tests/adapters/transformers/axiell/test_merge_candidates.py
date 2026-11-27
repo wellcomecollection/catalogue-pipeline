@@ -65,7 +65,7 @@ def test_multiple_qualifying_identifiers_yield_multiple_merge_candidates() -> No
     assert "CALM/Sierra harvest work" in reasons
 
 
-TEST_GUID = "00000000-0000-4000-8000-000000000001"
+TEST_GUID = "0000abcd-0000-4000-8000-00000000ef01"
 
 
 def _flagged_record(identifier: str = TEST_GUID) -> Record:

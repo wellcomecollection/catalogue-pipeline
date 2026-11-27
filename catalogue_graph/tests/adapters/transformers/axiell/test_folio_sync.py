@@ -8,7 +8,7 @@ from adapters.transformers.axiell.folio_sync import extract_synced_folio_instanc
 
 # mypy: allow-untyped-calls
 
-TEST_GUID = "00000000-0000-4000-8000-000000000001"
+TEST_GUID = "0000abcd-0000-4000-8000-00000000ef01"
 
 
 def _record(source_id: str, record_type: str | None, flag: str | None) -> Record:
