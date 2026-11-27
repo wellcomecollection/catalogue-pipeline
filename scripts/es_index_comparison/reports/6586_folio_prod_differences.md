@@ -210,12 +210,70 @@ The comparison ignores the order of values within a field. On 31 works a field h
 | 22 | Languages | A different language comes first, for example Turkish then English in production, and English then Turkish in FOLIO | Transformer: the first language is the Sierra LANG field in production and the 008 language in FOLIO, and the two name different languages | ✅ |
 | 9 | Notes | A copyright note and a related material note are in the opposite order | Source: both transformers list notes in the order of the record's fields. The Sierra record has field 787 before 542, and the FOLIO record has 542 before 787 | ✅ |
 
-## Open questions
+## After merging
 
-| Field | Works | Question |
-|---|---:|---|
-| Subjects, contributors | 50 | **Two ǂ0 in one field.** The work loses its authority identifier in FOLIO. The records could be corrected in FOLIO, or the transformer could pick the ǂ0 that looks like an authority identifier. |
-| Languages | 864 | **No language on records with no 008 in Sierra.** The migration gave them an 008 that says `und`, so the work has no language in FOLIO. This may be deliberate. Sierra's LANG field says English on 823 of them, which looks like a default: 710 have no cataloguing date. The other 41 have another language, such as Italian or Latin, and could be corrected in 008 by hand. To confirm with the migration team. Falling back to 998 ǂf in the transformer is not a good fix, because nobody maintains 998 in FOLIO, so a language removed from 008 would still show on the work. |
-| Several | 12 | **Changes made in Sierra that are not in FOLIO.** These are the 📝 rows: three works unsuppressed (b16641437, b33972230, b33972199), a title spelling (b33853137), two notes (b19689718, b14587452), a material type (b16082497), a wrong 776 link removed (b12720604), a Miro link added (b20461896) and three trailing full stops (b10823803, b10001566, b1217967x). Should the same changes be made in FOLIO? |
-| Sierra works with no FOLIO work | 1 | **A journal that lost its record in the migration.** The FOLIO record for BMJ (`in00008808112`, created on 14 October) has its 586 items but only a title and a language. It has no Sierra number (b2043277x), so the work gets a new canonical id and the current work page would stop working. Can the full record be loaded again? |
-| Other identifiers | all | **Seven-digit Sierra identifier.** Every Sierra work lists it (for example `1211199`) and no FOLIO work does. A FOLIO work lists only the full system number (`b12111995`). The seven-digit number is searchable in production today: searching for `1211199` returns that work first. This difference is removed by normalisation, so it is in none of the tables above. Is the seven-digit form still needed? |
+A second comparison covers `works-denormalised`, the output of the matcher and merger, for all works in both pipelines, as fetched on 24 November 2026.
+
+- **Population:** 2,268,882 works are in both pipelines. 789,162 are only in production, mostly [Sierra works with no FOLIO work](#sierra-works-with-no-folio-work). 273 are only in FOLIO.
+- **Earlier differences are excluded:** a difference that already exists at `works-identified` is not counted, so what remains comes from merging. Parts of TEI manuscripts become works only in the merger, so all their differences are counted here.
+- **Rules:** see [the config](../configs/6586_folio_prod_denormalised.yaml) and [the normaliser](../configs/6586_folio_prod_merged_normalise.py). Items, holdings and availabilities are ignored. Works of different types, and redirected works, are compared on type and redirect target only.
+- **To reproduce:** run the commands listed in [merged_differences_6586.py](../merged_differences_6586.py).
+
+349,214 works (15.4%) differ. Nearly all of them differ because the Sierra records for archives, pictures and audiovisual material were not migrated to FOLIO. The archive, METS and Miro works that merge with those records in production have nothing to merge with in FOLIO.
+
+### Archive works
+
+In production an archive work merges with the Sierra record for the same item. The Sierra record is also what connects it to its digitised copy (a METS work) and to Miro images.
+
+| Works | Difference | Cause | Status |
+|---:|---|---|:---:|
+| 197,402 | The archive work no longer merges with a Sierra work. Nothing else in its merge group changes (194,579 Axiell, 2,751 Calm, 72 TEI) | The Sierra record was not migrated. It contributed items, which are out of scope here, and on some works the b number | ✅ |
+| 29,622 | A Calm work loses its digitised copy, and the METS work becomes Invisible. Example: `a3js8n64` (RET/3/2/5/3, METS b24955590) | A METS work links to a b number. Axiell works had theirs imported ([platform#6525](https://github.com/wellcomecollection/platform/issues/6525)). These are the third-party archives kept in Calm, which have no b number and are not in Axiell | ⚠️ |
+| 9,250 | An Axiell work loses its Miro images, which become 9,427 separate Visible works. In production they redirect to it through its Sierra record. Example: `b9qv8p7q` (Miro M0009975) | The Sierra record (b33331777) links to both works, and was not migrated. The Axiell record also holds the Miro number, as `(Other number)`, but the Axiell transformer does not read it (checked on a sample of 60) | ⚠️ |
+| 383 | An Axiell work loses its digitised copy, and the METS work becomes Invisible | The Axiell work and the METS work merge through the Sierra record. Without it they merge only if the Axiell record lists the b number, and these do not | ⚠️ |
+| 101 | A METS work becomes Invisible, so the digitised copy is not in the catalogue. In production it redirects to its Sierra work, an archive record with no Axiell or Calm work | The Sierra work was not migrated | ⚠️ |
+
+Most Axiell works still list the b number as an identifier, because it is in the Axiell record itself. 54,585 works no longer list it, so a b number search does not find them: all 32,373 Calm works, 22,138 Axiell works with no b number in the record, and 74 TEI works. 5,978 of the works that lose a digitised copy or Miro image also lose their thumbnail. 18 Axiell works lose both their digitised copy and their Miro images, and are counted once under each.
+
+### Pictures and audiovisual works
+
+These Sierra records are due to move to Axiell. Whether the Axiell records will carry the b number, which the METS merges depend on, is an open question in [RFC 090](https://github.com/wellcomecollection/docs/tree/main/rfcs/090-axiell-folio-sync#open-questions). The Miro merges depend on a link in the Sierra record, which the RFC does not cover.
+
+| Works | Difference | Cause | Status |
+|---:|---|---|:---:|
+| 61,600 | A Miro work becomes a separate Visible work. In production it redirects to its Sierra work | The Sierra work was not migrated | ⚠️ |
+| 8,401 | A METS work becomes Invisible, so the digitised copy is not in the catalogue. In production it redirects to its Sierra work | The Sierra work was not migrated | ⚠️ |
+
+### Other differences
+
+| Works | Difference | Cause | Status |
+|---:|---|---|:---:|
+| 2,016 | 672 physical records have two or more digitised records, and each pipeline merges a different one. The one that is not merged stays a separate Visible work | The merger takes the first digitised record that links to the physical record. The order comes from an unordered set, so the choice is arbitrary. The new Python merger sorts the works first, so its choice is stable ([platform#6861](https://github.com/wellcomecollection/platform/issues/6861)) | ✅ |
+| 413 | TEI works differ in notes or physical description (412 parts of manuscripts, and 1 manuscript that was transformed again between the two fetches) | Stale FOLIO pipeline: its TEI works were transformed before the TEI transformer changes of 12 to 16 November | ✅ |
+| 351 | Works with the same links in both pipelines merge differently. 141 of them are METS works that merge in FOLIO and stay Invisible in production | Matcher bug: the matcher graph is inconsistent or incomplete for these groups, in production for 338 works, in FOLIO for 8 and in both for 5. The new Python merger does not have this issue ([platform#6861](https://github.com/wellcomecollection/platform/issues/6861)) | ✅ |
+| 129 | A work merges with a METS or TEI work that has a different canonical id in each pipeline. It is the same record on both sides | Expected: the two pipelines have separate id minter databases, so each minted its own id for a new record | ✅ |
+| 37 | In 18 groups, works are linked through a Sierra record that is Deleted in production and has no work in FOLIO. They are matched in FOLIO and not in production, so 17 METS works merge only in FOLIO | In production the Sierra record is Deleted, and the matcher never matches through a Deleted work. In FOLIO the record does not exist, so the works match through its identifier | ⚠️ |
+| 34 | The works, links and matcher graph are the same in both pipelines, but a METS work merges into a different library work (30), or a different thumbnail is chosen (4) | Two works qualify equally and the merger takes the first, from the same unordered set as in the first row | ✅ |
+| 24 | A merge group includes a work that is in only one pipeline, so the rest of the group merges differently | 22 works are in groups with a Sierra work that was not migrated. 2 are in a group with a FOLIO work that has no work in production | ✅ |
+| 16 | A work merges differently because of a difference described above | BMJ, `hzg28phe` and b17268941, the three suppressed works, the two EBSCO candidates, the Miro link on b20461896 and the 776 link on b12720604 | ✅ |
+| 10 | A part of a TEI manuscript belongs to a different manuscript in each pipeline, for example `a4b3d3d9` to `manuscript_15781` in production and `manuscript_15782` in FOLIO | Source: in each case two TEI manuscripts use the same part id (`WMS_Arabic_134` in the example), so both produce the same work and one overwrites the other | ⚠️ |
+| 4 | Two library works share a Miro image, and production gives one work's digitised copy to the other | Stale production: the works were last merged on 3 October, before the merger change of 14 October ([#3768](https://github.com/wellcomecollection/catalogue-pipeline/pull/3768)) | ✅ |
+| 3 | A Sierra work redirects to a different TEI work in each pipeline (`gwzjvxhb`) | Source: two TEI manuscripts, `Tamil_3` and `Tamil_ MS 3`, link to the same b number | ⚠️ |
+| 3 | A contributor on a part of a TEI manuscript has a different canonical id (`af9gjz5y`, `ahrmmhjn`, `anhw29e2`) | Expected: separate id minter databases, as above | ✅ |
+| 1 | A part of a TEI manuscript is Deleted in production and Visible in FOLIO (`wwqjyg5n`) | Known merger limitation: another manuscript once used this part id and still lists it as removed, so the part is Deleted or Visible depending on which manuscript was merged last | ✅ |
+
+## Follow-up tickets
+
+| Field | Works | Question | Tracked in |
+|---|---:|---|---|
+| Subjects, contributors | 50 | **Two ǂ0 in one field.** The work loses its authority identifier in FOLIO. The records could be corrected in FOLIO, or the transformer could pick the ǂ0 that looks like an authority identifier. | [platform#6907](https://github.com/wellcomecollection/platform/issues/6907) |
+| Languages | 864 | **No language on records with no 008 in Sierra.** The migration gave them an 008 that says `und`, so the work has no language in FOLIO. This may be deliberate. Sierra's LANG field says English on 823 of them, which looks like a default: 710 have no cataloguing date. The other 41 have another language, such as Italian or Latin, and could be corrected in 008 by hand. To confirm with the migration team. Falling back to 998 ǂf in the transformer is not a good fix, because nobody maintains 998 in FOLIO, so a language removed from 008 would still show on the work. | [platform#6908](https://github.com/wellcomecollection/platform/issues/6908) |
+| Several | 12 | **Changes made in Sierra that are not in FOLIO.** These are the 📝 rows: three works unsuppressed (b16641437, b33972230, b33972199), a title spelling (b33853137), two notes (b19689718, b14587452), a material type (b16082497), a wrong 776 link removed (b12720604), a Miro link added (b20461896) and three trailing full stops (b10823803, b10001566, b1217967x). Should the same changes be made in FOLIO? | [platform#6909](https://github.com/wellcomecollection/platform/issues/6909) |
+| Sierra works with no FOLIO work | 1 | **A journal that lost its record in the migration.** The FOLIO record for BMJ (`in00008808112`, created on 14 October) has its 586 items but only a title and a language. It has no Sierra number (b2043277x), so the work gets a new canonical id and the current work page would stop working. Can the full record be loaded again? | [platform#6910](https://github.com/wellcomecollection/platform/issues/6910) |
+| Other identifiers | all | **Seven-digit Sierra identifier.** Every Sierra work lists it (for example `1211199`) and no FOLIO work does. A FOLIO work lists only the full system number (`b12111995`). The seven-digit number is searchable in production today: searching for `1211199` returns that work first. Archive works that merge with a Sierra work list it as well, and lose it in FOLIO. This difference is removed by normalisation, so it is in none of the tables above. Is the seven-digit form still needed? | [platform#6911](https://github.com/wellcomecollection/platform/issues/6911) |
+| After merging | 29,622 | **Third-party archives lose their digitised copy.** They are kept in Calm, with no b number for the METS work to link to, and are not in Axiell. How should they get one? | [platform#6924](https://github.com/wellcomecollection/platform/issues/6924) |
+| After merging | 383 | **Axiell works with no b number lose their digitised copy.** The b number import did not reach them. Why, and can it be run again for them? | [platform#6925](https://github.com/wellcomecollection/platform/issues/6925) |
+| After merging | 8,502 | **Digitised copies with no catalogue record.** Their Sierra record was not migrated: 8,401 pictures and audiovisual works, and 101 archive records. Will the Axiell records for pictures and audiovisual works carry the b number ([RFC 090](https://github.com/wellcomecollection/docs/tree/main/rfcs/090-axiell-folio-sync#open-questions))? Were the 101 archive records left out on purpose? | [platform#6927](https://github.com/wellcomecollection/platform/issues/6927), [platform#6929](https://github.com/wellcomecollection/platform/issues/6929) |
+| After merging | 71,027 | **Miro images become separate works.** 9,427 belong to archive works, whose Axiell record holds the Miro number as `(Other number)`. Should the Axiell transformer make a merge candidate from it? 61,600 belong to pictures. Will their Axiell records hold the Miro number too? | [platform#6926](https://github.com/wellcomecollection/platform/issues/6926), [platform#6929](https://github.com/wellcomecollection/platform/issues/6929) |
+| After merging | 37 | **Works matched through a deleted Sierra record.** The suppressed Sierra record that kept them apart in production was not migrated, so 17 METS works merge into archive or library works in FOLIO only. Are these merges wanted? | [platform#6928](https://github.com/wellcomecollection/platform/issues/6928) |
+| After merging | 13 | **TEI data quality.** 10 part ids are each used by two TEI manuscripts, so one part overwrites the other. Two manuscripts, `Tamil_3` and `Tamil_ MS 3`, link to the same b number (b32724330). To correct in the TEI files. | [platform#6930](https://github.com/wellcomecollection/platform/issues/6930) |
