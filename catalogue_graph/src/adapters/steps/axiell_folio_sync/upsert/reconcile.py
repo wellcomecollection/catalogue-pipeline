@@ -12,7 +12,6 @@ path uses, so no MARC parse or mapping is needed here.
 from __future__ import annotations
 
 from collections.abc import Callable
-from functools import partial
 
 import structlog
 
@@ -100,9 +99,27 @@ def hide_by_guid(
     dry_run: bool = False,
 ) -> GuidCascadeResult:
     """Hide a GUID's FOLIO records from discovery, leaving them visible to staff."""
-    return _cascade_by_guid(
-        guid, folio, partial(_suppress_entity, staff=False), dry_run=dry_run
-    )
+    result = GuidCascadeResult(guid=guid)
+    for attr, search_path, list_key, id_of in _CASCADE_ENTITIES:
+        # Hiding has no child-first constraint, so one failure must not stop the rest.
+        try:
+            setattr(
+                result,
+                attr,
+                _suppress_entity(
+                    folio,
+                    search_path=search_path,
+                    list_key=list_key,
+                    write_path_prefix=search_path,
+                    folio_id=id_of(guid),
+                    dry_run=dry_run,
+                    staff=False,
+                ),
+            )
+        except Exception as exc:
+            result.errors.append(UpsertError(type="api", detail=str(exc)))
+            logger.error("hide error", guid=guid, error=str(exc), exc_info=True)
+    return result
 
 
 def delete_by_guid(

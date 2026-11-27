@@ -9,7 +9,9 @@ These run against an in-memory FOLIO fake, not the sandbox.
 
 from __future__ import annotations
 
+from collections.abc import Mapping
 from datetime import datetime
+from typing import Any
 
 import pytest
 from pymarc.record import Record
@@ -258,6 +260,37 @@ def test_hiding_an_unmapped_withheld_record_is_in_the_manifest(
     [entry] = reports[-1].deletions
     assert (entry.guid, entry.reason) == (GUID, "withheld")
     assert [error.stage for error in reports[-1].errors] == ["mapping"]
+
+
+def test_reticking_an_unmapped_withheld_record_shows_it_to_staff() -> None:
+    folio = _synced()
+    _sync(folio, _record(flagged=False))
+    _assert_suppressed(folio)
+
+    _sync(folio, _unmapped(UNPUBLISHED))
+
+    _assert_hidden_from_discovery_only(folio)
+
+
+class _FailingItems(StatefulInventory):
+    def put(self, path: str, payload: Mapping[str, Any]) -> dict[str, Any]:
+        if path.startswith("/inventory/items"):
+            raise RuntimeError("item write failed")
+        return super().put(path, payload)
+
+
+def test_a_failed_item_write_does_not_stop_the_instance_being_hidden() -> None:
+    folio = _FailingItems()
+    _sync(folio, _record(flagged=True))
+
+    resp = _sync(folio, _unmapped(UNPUBLISHED))
+
+    # The FOLIO transformer reads the instance's flag.
+    assert folio.instance()["discoverySuppress"] is True
+    assert folio.holdings()["discoverySuppress"] is True
+    assert folio.item()["discoverySuppress"] is False
+    assert resp.counts["suppressed"] == 2
+    assert resp.counts["failed"] == 1
 
 
 def test_an_unmapped_withheld_record_already_hidden_is_not_written_again() -> None:
