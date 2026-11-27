@@ -16,11 +16,12 @@ Split into focused modules; this package re-exports the public entry points so
   • reconcile  suppress_by_guid / delete_by_guid — the guid-cascade delete path
 """
 
-from .reconcile import delete_by_guid, suppress_by_guid
+from .reconcile import delete_by_guid, hide_by_guid, suppress_by_guid
 from .writer import upsert_from_payloads
 
 __all__ = [
     "delete_by_guid",
+    "hide_by_guid",
     "suppress_by_guid",
     "upsert_from_payloads",
 ]

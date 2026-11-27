@@ -235,8 +235,11 @@ def _suppress_entity(
     write_path_prefix: str,
     folio_id: str,
     dry_run: bool,
+    staff: bool = True,
 ) -> EntityResult:
     """Resolve an entity by id and set its suppression flags.
+
+    ``staff=False`` hides it from discovery only, leaving it visible to staff.
 
     discoverySuppress is set on every entity; staffSuppress only on instances,
     which are the only FOLIO inventory entity with that field. holdings-storage
@@ -257,7 +260,7 @@ def _suppress_entity(
 
     folio_id = existing["id"]
     suppression: dict[str, Any] = {"discoverySuppress": True}
-    if write_path_prefix in _STAFF_SUPPRESS_PATHS:
+    if staff and write_path_prefix in _STAFF_SUPPRESS_PATHS:
         suppression["staffSuppress"] = True
     if all(existing.get(flag) is True for flag in suppression):
         return EntityResult(action="already_suppressed", id=folio_id)

@@ -12,6 +12,7 @@ path uses, so no MARC parse or mapping is needed here.
 from __future__ import annotations
 
 from collections.abc import Callable
+from functools import partial
 
 import structlog
 
@@ -90,6 +91,18 @@ def suppress_by_guid(
     already set is reported as ``already_suppressed`` and not written again.
     """
     return _cascade_by_guid(guid, folio, _suppress_entity, dry_run=dry_run)
+
+
+def hide_by_guid(
+    guid: str,
+    folio: FolioInventoryOps,
+    *,
+    dry_run: bool = False,
+) -> GuidCascadeResult:
+    """Hide a GUID's FOLIO records from discovery, leaving them visible to staff."""
+    return _cascade_by_guid(
+        guid, folio, partial(_suppress_entity, staff=False), dry_run=dry_run
+    )
 
 
 def delete_by_guid(

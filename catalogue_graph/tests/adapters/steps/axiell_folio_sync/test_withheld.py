@@ -14,6 +14,7 @@ from datetime import datetime
 import pytest
 from pymarc.record import Record
 
+from adapters.steps.axiell_folio_sync.mapping import withheld_guid
 from adapters.steps.axiell_folio_sync.mapping.builders import _is_withheld
 from adapters.steps.axiell_folio_sync.mapping.marc import MappingError, parse_xml
 from adapters.steps.axiell_folio_sync.report import AxiellFolioSyncReport
@@ -21,6 +22,7 @@ from adapters.transformers.builders.axiell_work_builder import AxiellWorkBuilder
 from models.pipeline.source.work import DeletedSourceWork
 
 from .test_harvest_untick import (
+    GUID,
     StatefulInventory,
     _assert_suppressed,
     _assert_unsuppressed,
@@ -163,13 +165,32 @@ _TRANSFORMER_FIELDS = (
 )
 
 
-def _full_record(*, publish_to_web: str | None, for_deletion: bool) -> Record:
+def _full_record(
+    *,
+    publish_to_web: str | None = "yes",
+    for_deletion: bool = False,
+    alt_ref_no: str = "TEST/1",
+) -> Record:
     """A record with enough for the Axiell transformer as well as the sync."""
     record = parse_xml(
         _record(flagged=True, publish_to_web=publish_to_web, for_deletion=for_deletion)
     )
     record.add_field(*parse_xml(_TRANSFORMER_FIELDS).fields)
+    record.add_field(
+        *parse_xml(
+            "<record><datafield tag='035'>"
+            f"<subfield code='a'>(AltRefNo){alt_ref_no}</subfield>"
+            "</datafield></record>"
+        ).fields
+    )
     return record
+
+
+def _is_suppressed_by_transformer(record: Record) -> bool:
+    work = AxiellWorkBuilder(
+        record, last_modified=datetime(2020, 1, 1)
+    ).transform_work()
+    return isinstance(work, DeletedSourceWork)
 
 
 @pytest.mark.parametrize("publish_to_web", ["yes", "no"])
@@ -179,8 +200,118 @@ def test_withheld_agrees_with_the_axiell_transformer(
 ) -> None:
     # A record the Axiell transformer suppresses must never be public in FOLIO.
     record = _full_record(publish_to_web=publish_to_web, for_deletion=for_deletion)
-    work = AxiellWorkBuilder(
-        record, last_modified=datetime(2020, 1, 1)
-    ).transform_work()
 
-    assert _is_withheld(record) == isinstance(work, DeletedSourceWork)
+    assert _is_withheld(record) == _is_suppressed_by_transformer(record)
+
+
+def test_a_missing_marker_is_an_error_here_and_a_suppression_in_the_transformer() -> (
+    None
+):
+    record = _full_record(publish_to_web=None)
+
+    assert _is_suppressed_by_transformer(record) is True
+    with pytest.raises(MappingError):
+        _is_withheld(record)
+
+
+def test_resource_guides_are_suppressed_by_the_transformer_only() -> None:
+    # The sync does not check for AMSG; recorded so the difference is deliberate.
+    record = _full_record(alt_ref_no="AMSG/1")
+
+    assert _is_suppressed_by_transformer(record) is True
+    assert _is_withheld(record) is False
+
+
+# -- a withheld record that fails to map --
+
+
+def _unmapped(content: str) -> str:
+    """The same record without its normal location, which the mapping requires."""
+    location = "<datafield tag='984'><subfield code='b'>215/HOME</subfield></datafield>"
+    assert location in content
+    return content.replace(location, "")
+
+
+@pytest.mark.parametrize("content", [UNPUBLISHED, FOR_DELETION])
+def test_a_withheld_record_that_fails_to_map_is_still_hidden(content: str) -> None:
+    folio = _synced()
+
+    resp = _sync(folio, _unmapped(content))
+
+    _assert_hidden_from_discovery_only(folio)
+    assert resp.counts["failed"] == 1
+    assert resp.counts["withheld_unmapped"] == 1
+    assert resp.counts["suppressed"] == 3
+    assert resp.counts["withheld"] == 0
+
+
+def test_hiding_an_unmapped_withheld_record_is_in_the_manifest(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    reports: list[AxiellFolioSyncReport] = []
+    monkeypatch.setattr(
+        AxiellFolioSyncReport, "publish", lambda self: reports.append(self)
+    )
+
+    _sync(_synced(), _unmapped(UNPUBLISHED))
+
+    [entry] = reports[-1].deletions
+    assert (entry.guid, entry.reason) == (GUID, "withheld")
+    assert [error.stage for error in reports[-1].errors] == ["mapping"]
+
+
+def test_an_unmapped_withheld_record_already_hidden_is_not_written_again() -> None:
+    folio = _synced()
+    _sync(folio, UNPUBLISHED)
+    puts_before = len(folio.puts)
+
+    resp = _sync(folio, _unmapped(UNPUBLISHED))
+
+    assert len(folio.puts) == puts_before
+    assert resp.counts["suppressed"] == 0
+
+
+def test_an_unmapped_withheld_record_never_synced_creates_nothing() -> None:
+    folio = StatefulInventory()
+
+    resp = _sync(folio, _unmapped(UNPUBLISHED))
+
+    assert folio.count() == 0
+    assert resp.counts["failed"] == 1
+
+
+def test_an_unmapped_withheld_record_is_not_hidden_on_a_dry_run() -> None:
+    folio = _synced()
+
+    _sync(folio, _unmapped(UNPUBLISHED), dry_run=True)
+
+    _assert_unsuppressed(folio)
+
+
+def test_a_published_record_that_fails_to_map_is_left_alone() -> None:
+    folio = _synced()
+    puts_before = len(folio.puts)
+
+    resp = _sync(folio, _unmapped(_record(flagged=True)))
+
+    _assert_unsuppressed(folio)
+    assert len(folio.puts) == puts_before
+    assert resp.counts["withheld_unmapped"] == 0
+
+
+@pytest.mark.parametrize(
+    "content",
+    [
+        _record(flagged=True),
+        NO_MARKER,
+        _record(flagged=False, publish_to_web="no"),
+        _record(flagged=True, publish_to_web="no", level="Series"),
+        _record(flagged=True, publish_to_web="no", guid="not-a-guid"),
+    ],
+)
+def test_withheld_guid_is_none_unless_selected_and_withheld(content: str) -> None:
+    assert withheld_guid(content) is None
+
+
+def test_withheld_guid_is_the_001_of_a_withheld_record() -> None:
+    assert withheld_guid(UNPUBLISHED) == GUID

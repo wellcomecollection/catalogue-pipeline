@@ -302,11 +302,8 @@ def _assemble_payloads(
     deleted: bool,
     withheld: bool = False,
 ) -> MappedPayloads:
-    """Build the three FOLIO payloads + meta from an already-extracted record.
-
-    A withheld record is hidden from discovery on all three, and left visible
-    to staff.
-    """
+    """Build the three FOLIO payloads + meta from an already-extracted record."""
+    # Withheld records stay visible to staff, so staffSuppress is left alone.
     hidden = {"discoverySuppress": withheld}
     return MappedPayloads(
         instance=build_instance(rec, ref_cache).model_copy(update=hidden),
@@ -363,12 +360,9 @@ def _selection(root: Record) -> Selection:
 
 
 def _is_withheld(root: Record) -> bool:
-    """Whether Collections withholds the record from the public.
+    """Whether Collections unticked publish to web or ticked for deletion.
 
-    Uses the Axiell transformer's own rules, so a record it suppresses is never
-    public in FOLIO. Raises :class:`MappingError` when the publish marker is
-    missing: the stylesheet emits it on every record, so its absence is a
-    harvest fault, and suppressing on it could hide every synced record.
+    A missing marker raises: hiding on a harvest fault could hide every record.
     """
     if is_marked_for_deletion(root):
         return True
@@ -378,6 +372,25 @@ def _is_withheld(root: Record) -> bool:
             "cannot be told apart from a withheld one"
         )
     return not is_publishable(root)
+
+
+def withheld_guid(xml_content: str) -> str | None:
+    """The GUID of a selected, withheld record, or None.
+
+    For a record that failed to map: its FOLIO records must still be hidden.
+    """
+    root = parse_xml(xml_content)
+    if _selection(root) != "selected":
+        return None
+    try:
+        if not _is_withheld(root):
+            return None
+        source_id = (extract(root, MARC_SOURCE["source_id"]) or "").strip()
+        _guid(source_id)
+    except ValueError:
+        # MappingError is a ValueError: no marker, or no UUID to derive ids from.
+        return None
+    return source_id
 
 
 def unflagged_guid(xml_content: str) -> str | None:
@@ -411,9 +424,7 @@ def select_and_build(
     Returns ``None`` when the record fails either selection gate: not
     item-level, or no ``980 $a`` harvest flag. Raises on malformed XML or mapping errors.
 
-    A selected record that is not published to the web, or is ticked for
-    deletion, is still built, with ``discoverySuppress`` set (see
-    :func:`_is_withheld`).
+    A withheld record is still built, with ``discoverySuppress`` set.
     """
     root = parse_xml(xml_content)
 
