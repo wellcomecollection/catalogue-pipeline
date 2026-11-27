@@ -48,7 +48,12 @@ from .config import (
     _instance_id,
     _item_id,
 )
-from .marc import CanonicalRecord, MappingError, extract, parse_xml
+from .marc import (
+    CanonicalRecord,
+    MappingError,
+    extract,
+    parse_xml,
+)
 from .payloads import (
     Holdings,
     Identifier,
@@ -374,23 +379,39 @@ def _is_withheld(root: Record) -> bool:
     return not is_publishable(root)
 
 
-def withheld_guid(xml_content: str) -> str | None:
-    """The GUID of a selected, withheld record, or None.
+# A selected record without one of these cannot map, whatever the tenant holds.
+_MANDATORY_FIELDS = (
+    "title",
+    MATERIAL_TYPE_FIELD.canonical,
+    NORMAL_LOCATION_FIELD.canonical,
+)
 
-    For a record that failed to map: its FOLIO records must still be hidden.
+
+def unmapped_guid(xml_content: str) -> tuple[str, bool] | None:
+    """The GUID of a selected record to hide after it failed to map, and whether it is withheld.
+
+    Only for a missing mandatory field or a withheld record. Any other failure
+    may be a tenant or mapping-table fault, which could hide every record.
     """
     root = parse_xml(xml_content)
     if _selection(root) != "selected":
         return None
     try:
-        if not _is_withheld(root):
+        withheld = _is_withheld(root)
+        # Read from the record, as the first mapping error can mask a missing field.
+        missing = any(
+            not (extract(root, MARC_SOURCE[field]) or "").strip()
+            for field in _MANDATORY_FIELDS
+            if field
+        )
+        if not (withheld or missing):
             return None
         source_id = (extract(root, MARC_SOURCE["source_id"]) or "").strip()
         _guid(source_id)
     except ValueError:
         # MappingError is a ValueError: no marker, or no UUID to derive ids from.
         return None
-    return source_id
+    return source_id, withheld
 
 
 def unflagged_guid(xml_content: str) -> str | None:

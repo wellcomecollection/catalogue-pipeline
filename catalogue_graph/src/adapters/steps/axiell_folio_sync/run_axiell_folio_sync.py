@@ -23,7 +23,7 @@ from adapters.steps.axiell_folio_sync.mapping import (
     MappingError,
     select_and_build,
     unflagged_guid,
-    withheld_guid,
+    unmapped_guid,
 )
 from adapters.steps.axiell_folio_sync.models import (
     AxiellFolioSyncEvent,
@@ -48,6 +48,9 @@ from adapters.steps.axiell_folio_sync.upsert import (
 from adapters.utils.axiell_changeset_reader import SupersededGuid
 
 logger = structlog.get_logger(__name__)
+
+# A harvest fault that drops a mandatory field would otherwise hide every record.
+MAX_MISSING_FIELD_HIDES = 50
 
 
 def utc_now_iso() -> str:
@@ -291,6 +294,7 @@ def run_sync(
     unflagged_entries: list[SyncDeletionEntry] = []
     total_successful = 0
     total_errors = 0
+    missing_field_hides = 0
     counts: dict[str, int] = {
         "created": 0,
         "updated": 0,
@@ -324,8 +328,12 @@ def run_sync(
         "unflagged_suppressed": 0,
         # Selected records written hidden from discovery, as Collections asked.
         "withheld": 0,
-        # Withheld records that failed to map. Also counted in "failed".
-        "withheld_unmapped": 0,
+        # Records hidden from discovery because they failed to map, so stale
+        # FOLIO data is not public. Also counted in "failed".
+        "unmapped_hidden": 0,
+        # Published records with a missing mandatory field left as they were,
+        # because the run had already hidden MAX_MISSING_FIELD_HIDES of them.
+        "unmapped_hide_capped": 0,
         # Records whose item carried a location note the sync could no longer
         # claim, so a duplicate was left behind. Not an error: nothing failed and
         # nothing was lost, but each one needs reconciling by hand in FOLIO.
@@ -366,15 +374,30 @@ def run_sync(
             errors_list.append(
                 _build_error(source_id, changeset_id, "mapping", str(exc))
             )
-            # A withheld record must not stay public because it failed to map.
-            guid = withheld_guid(row["content"])
-            if guid is not None:
-                counts["withheld_unmapped"] += 1
+            # FOLIO still holds the last good sync, which may now be wrong
+            # (closed or withheld since), so it is hidden until the record maps.
+            unmapped = unmapped_guid(row["content"])
+            if unmapped is not None:
+                hide_guid, withheld = unmapped
+                if not withheld and missing_field_hides >= MAX_MISSING_FIELD_HIDES:
+                    counts["unmapped_hide_capped"] += 1
+                    logger.error("unmapped_hide_capped", source_id=source_id)
+                    continue
+                hidden = hide_by_guid(hide_guid, folio, dry_run=dry_run)
+                actions = {
+                    getattr(hidden, entity).action
+                    for entity in ("instance", "holdings", "item")
+                }
+                if "suppress" in actions:
+                    counts["unmapped_hidden"] += 1
+                # Already-hidden records count too, so a retried run cannot hide 50 more.
+                if not withheld and actions & {"suppress", "already_suppressed"}:
+                    missing_field_hides += 1
                 _record_cascade(
-                    hide_by_guid(guid, folio, dry_run=dry_run),
+                    hidden,
                     record_id=source_id,
                     changeset_id=changeset_id,
-                    reason="withheld",
+                    reason="unmapped",
                     stage="suppress",
                     counts=counts,
                     entries=unflagged_entries,

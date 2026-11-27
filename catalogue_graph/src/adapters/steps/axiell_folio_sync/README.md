@@ -37,9 +37,19 @@ The design, record-selection rules and tombstone semantics are specified in
      `no`) or is ticked for deletion (MARC `985 $a`) is still synced, with `discoverySuppress` set on all three
      FOLIO records and `staffSuppress` left clear, so staff can work with it and the public catalogue does not show
      it. The two checkbox rules are the Axiell transformer's own (`transformers/axiell/publish_to_web.py`).
-     Publishing the record clears the flag on the next run. These records are counted in `withheld`. If a withheld
-     record fails to map, its existing FOLIO records are still hidden from discovery (`hide_by_guid`); it is counted
-     in `failed` and `withheld_unmapped`, and listed in the manifest's deletions with the reason `withheld`.
+     Publishing the record clears the flag on the next run. These records are counted in `withheld`.
+   * **Records that fail to map** (`unmapped_guid`): a selected record with a mapping error is not written, so FOLIO
+     would keep the last good sync, which may no longer be true: the record may have been closed or withheld in the
+     same edit. When a mandatory field is missing (title, material type or normal location), or the record is
+     withheld, its existing FOLIO records are hidden from discovery (`hide_by_guid`) and stay visible to staff. The
+     record has to be corrected in Collections, and the run that next maps it clears the flag. It is counted in
+     `failed`, and in `unmapped_hidden` when something was hidden, and listed in the manifest's deletions with the
+     reason `unmapped`. Other mapping errors hide nothing, because a value missing from a mapping table or from the
+     FOLIO tenant may be a fault in the table, the tenant or a deploy, and could hide every synced record.
+     A harvest that lost a mandatory field would fail every record this way, so a run hides at most 50 published
+     records for a missing field (`MAX_MISSING_FIELD_HIDES`). The rest are left as they were, counted in
+     `unmapped_hide_capped` and logged as errors. Records an earlier attempt already hid count towards the 50, so
+     a retried run does not hide more. Withheld records are not capped.
    * **Where the sync and the Axiell transformer differ.** A record with no recognisable `981 $a` fails with a
      mapping error and its FOLIO records are left as they were: the stylesheet emits the marker on every record, so
      its absence is a harvest fault, and hiding on it could hide every synced record. The transformer suppresses
