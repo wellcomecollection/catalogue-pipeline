@@ -369,7 +369,7 @@ def run_sync(
             )
             # FOLIO still holds the last good sync, which may now be wrong
             # (closed or withheld since), so it is hidden until the record maps.
-            guid = unmapped_guid(row["content"])
+            guid = unmapped_guid(row["content"], exc)
             if guid is not None:
                 hidden = hide_by_guid(guid, folio, dry_run=dry_run)
                 if any(

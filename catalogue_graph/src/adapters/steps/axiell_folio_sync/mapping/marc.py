@@ -25,6 +25,10 @@ class MappingError(ValueError):
     """Raised when a required MARC field is absent or a lookup cannot be resolved."""
 
 
+class MissingFieldError(MappingError):
+    """A mandatory field is absent, a fault that can only come from the record."""
+
+
 @dataclass
 class CanonicalRecord:
     """Intermediate model extracted from a single MARCXML record."""

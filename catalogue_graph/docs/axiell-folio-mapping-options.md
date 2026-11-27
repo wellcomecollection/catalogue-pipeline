@@ -55,7 +55,7 @@ and an item, with about 7,100 failures reported in the run manifest.
 | Record | What happens |
 | --- | --- |
 | item-level, harvest flag set, maps | created, or updated if it already exists |
-| item-level, harvest flag set, fails to map | reported as an error; nothing is written for it |
+| item-level, harvest flag set, fails to map | reported as an error and not written; its existing FOLIO records are hidden from discovery when a mandatory field is missing or the record is withheld |
 | item-level, no harvest flag | its FOLIO records are suppressed if they exist; otherwise skipped |
 | not item-level | skipped |
 | deleted in Collections, or its GUID superseded | its item, holdings and instance are hard deleted |

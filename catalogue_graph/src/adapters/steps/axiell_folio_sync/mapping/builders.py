@@ -48,7 +48,13 @@ from .config import (
     _instance_id,
     _item_id,
 )
-from .marc import CanonicalRecord, MappingError, extract, parse_xml
+from .marc import (
+    CanonicalRecord,
+    MappingError,
+    MissingFieldError,
+    extract,
+    parse_xml,
+)
 from .payloads import (
     Holdings,
     Identifier,
@@ -111,7 +117,7 @@ def _resolve(field: FieldMap, rec: CanonicalRecord, ref: RefCache) -> str:
     raw = getattr(rec, field.canonical) if field.canonical else None
     value = (raw or "").strip()
     if field.required and not value:
-        raise MappingError(
+        raise MissingFieldError(
             f"Missing {field.label} (MARC {field.marc}) for source_id={rec.source_id}"
             " — required, with no default to fall back on"
         )
@@ -151,7 +157,7 @@ def _resolve(field: FieldMap, rec: CanonicalRecord, ref: RefCache) -> str:
 
 def build_instance(rec: CanonicalRecord, ref: RefCache) -> Instance:
     if not rec.title:
-        raise MappingError(f"Missing 245$a (title) for source_id={rec.source_id}")
+        raise MissingFieldError(f"Missing 245$a (title) for source_id={rec.source_id}")
     # AxC object_number (the (AltRefNo)-prefixed 035$a) becomes a "Local identifier"
     # on the instance. Absent when the record carries no (AltRefNo) 035$a — omit
     # identifiers entirely then.
@@ -374,16 +380,19 @@ def _is_withheld(root: Record) -> bool:
     return not is_publishable(root)
 
 
-def unmapped_guid(xml_content: str) -> str | None:
+def unmapped_guid(xml_content: str, error: MappingError) -> str | None:
     """The GUID of a selected record whose FOLIO records to hide after it failed to map.
 
-    None without a publish marker: that is a harvest fault, so FOLIO is left alone.
+    Only for a missing mandatory field or a withheld record. Any other failure
+    may be a tenant or mapping-table fault, which could hide every record.
     """
     root = parse_xml(xml_content)
     if _selection(root) != "selected":
         return None
     try:
-        _is_withheld(root)
+        withheld = _is_withheld(root)
+        if not (withheld or isinstance(error, MissingFieldError)):
+            return None
         source_id = (extract(root, MARC_SOURCE["source_id"]) or "").strip()
         _guid(source_id)
     except ValueError:
