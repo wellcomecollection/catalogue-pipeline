@@ -1,6 +1,5 @@
 # Backplane (backplane/v1) description of this repository's software, gathered
-# into https://github.com/wellcomecollection/catalog. A Component that deploys
-# independently points at the deploy tracker config in its own folder.
+# into https://github.com/wellcomecollection/catalog.
 apiVersion: backplane/v1
 kind: System
 metadata:
@@ -22,7 +21,6 @@ metadata:
   annotations:
     github.com/project-slug: wellcomecollection/catalogue-pipeline
     backstage.io/source-location: url:https://github.com/wellcomecollection/catalogue-pipeline/tree/main/catalogue_graph/
-    wellcomecollection.org/deploy-tracker: catalogue_graph/.deploy-tracker.yml
     backplane/dora-paths: catalogue_graph
   links:
     - title: Runbook
@@ -37,8 +35,3 @@ spec:
       tier: production
       github:
         task: "deploy:catalogue_graph"
-  # Removed at this repo's cutover from deploy-tracker, which labels and comments on PRs until then
-  notifications:
-    deployments:
-      labels: false
-      prComments: false
