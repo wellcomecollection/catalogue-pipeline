@@ -216,3 +216,82 @@ def test_live_and_uat_reports_with_the_same_job_id_do_not_collide(
         "s3://bucket-1/manifests/axiell/20261127T1015.json",
         "s3://bucket-1/manifests/axiell_uat/20261127T1015.json",
     ]
+
+
+_OKAPI_OVERRIDES = ["OKAPI_URL", "OKAPI_TENANT", "OKAPI_USERNAME", "OKAPI_PASSWORD"]
+
+
+def _stub_handler_dependencies(monkeypatch: pytest.MonkeyPatch) -> dict[str, Any]:
+    """Stub everything past credential resolution, recording the FOLIO URL the
+    handler builds its client for."""
+    built: dict[str, Any] = {}
+
+    class FakeFolioClient:
+        def __init__(self, url: str, tenant: str, **kwargs: Any) -> None:
+            built["url"] = url
+
+    class FakeRefCache:
+        def __init__(self, _inventory: Any) -> None:
+            pass
+
+        def load(self) -> FakeRefCache:
+            return self
+
+    def fake_run_sync(event: AxiellFolioSyncEvent, *a: Any, **kw: Any) -> Any:
+        return AxiellFolioSyncResponse(
+            job_id=event.job_id, dry_run=True, folio_target=kw["folio_target"]
+        )
+
+    monkeypatch.setattr(sync_mod, "FolioClient", FakeFolioClient)
+    monkeypatch.setattr(sync_mod, "FolioInventoryClient", lambda client: client)
+    monkeypatch.setattr(sync_mod, "ssl_context_from_env", lambda: None)
+    monkeypatch.setattr(sync_mod, "RefCache", FakeRefCache)
+    monkeypatch.setattr(sync_mod, "read_rows", lambda *a, **kw: ([], [], []))
+    monkeypatch.setattr(sync_mod, "run_sync", fake_run_sync)
+    return built
+
+
+@pytest.mark.parametrize("override", _OKAPI_OVERRIDES)
+def test_a_uat_run_refuses_an_unscoped_okapi_override(
+    monkeypatch: pytest.MonkeyPatch, override: str
+) -> None:
+    """An OKAPI_* override applies to whichever target the run resolves, so a UAT
+    run with one set could write UAT records with another tenant's details. It
+    fails before any credentials are read or a FOLIO client is built."""
+    _clear_okapi_env(monkeypatch)
+    monkeypatch.setenv("OKAPI_TEST_SECRET_PARAM", "/test/okapi")
+    monkeypatch.setenv(override, "from-env")
+    fetched = _stub_ssm(monkeypatch, {})
+    built = _stub_handler_dependencies(monkeypatch)
+
+    with pytest.raises(ValueError, match="unscoped OKAPI credential overrides"):
+        sync_mod.handler(
+            AxiellFolioSyncEvent(job_id="j", transformer_type="axiell_uat"),
+            use_rest_api_table=False,
+        )
+
+    assert fetched == []
+    assert built == {}
+
+
+def test_a_live_run_still_honours_okapi_overrides(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """The check is UAT only: a live run (here a prod dry run) keeps using the
+    overrides, as local runs rely on them."""
+    _clear_okapi_env(monkeypatch)
+    for name in _OKAPI_OVERRIDES:
+        monkeypatch.setenv(
+            name, "https://override.example" if name == "OKAPI_URL" else "x"
+        )
+    built = _stub_handler_dependencies(monkeypatch)
+
+    response = sync_mod.handler(
+        AxiellFolioSyncEvent(
+            job_id="j", transformer_type="axiell", folio_target="prod"
+        ),
+        use_rest_api_table=False,
+    )
+
+    assert built["url"] == "https://override.example"
+    assert response.folio_target == "prod"
